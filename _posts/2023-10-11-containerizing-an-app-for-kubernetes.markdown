@@ -14,16 +14,25 @@ important.
 
 ## Requirements
 
-The docker cli client, a container runtime, and kubectl. If you're on a mac, you
-can install all of these tools through homebrew. You don't have to use colima
-for your container runtime but its quick and easy to set up. It also helps that
-colima can run Kubernetes for us without a lot of setup.
+You will need to install the [docker cli client](https://github.com/docker/cli),
+[a container runtime](https://github.com/abiosoft/colima), and
+[kubectl](https://github.com/kubernetes/kubectl). We can use Colima as our
+container runtime, however it's not mandatory to do so. You can subsitute any
+other container runtime supported by your machine. It also helps that Colima can
+run Kubernetes for us without a lot of setup.
 
-```bash
-brew install docker kubectl colima
+{% include titlebar.html title="zsh" %}
+
+```zsh
+brew install docker colima kubectl
 ```
 
-```bash
+If you do choose to use Colima, you can edit the configuration and start it in
+one command as follows:
+
+{% include titlebar.html title="zsh" %}
+
+```zsh
 colima start -k -e # Open settings in $EDITOR before launch
 ```
 
@@ -31,7 +40,7 @@ colima start -k -e # Open settings in $EDITOR before launch
 
 Let's start with containerizing a simple application to see what it takes.
 
-#### `app.ru`
+{% include titlebar.html title="app.ru" %}
 
 ```ruby
 # frozen_string_literal: true
@@ -61,10 +70,10 @@ end
 run Application.new
 ```
 
-With our app code in hand, we'll also need a Dockerfile to build a container
+With our app code in hand, we'll also need a `Dockerfile` to build a container
 image to run our app.
 
-#### `Dockerfile`
+{% include titlebar.html title="Dockerfile" %}
 
 ```Dockerfile
 # define our base image to base this one off of
@@ -85,7 +94,9 @@ CMD rackup app.ru
 
 Now we need to turn this code into a container image we can use in later steps.
 
-```bash
+{% include titlebar.html title="zsh" %}
+
+```zsh
 docker build -t rack-app .
 ```
 
@@ -96,7 +107,9 @@ colima, you'll need to push the image to somewhere public like Docker Hub. You
 can push to Docker Hub with a command like the following (after authenticating
 with them).
 
-```bash
+{% include titlebar.html title="zsh" %}
+
+```zsh
 docker login # authenticate with Docker Hub
 docker tag rack-app:latest <docker-hub-username>/rack-app:latest
 docker push <docker-hub-username>/rack-app:latest
@@ -107,7 +120,7 @@ image for it. What now? We'll need some Kubernetes manifest files to describe
 the resources we want to create when deploying our app. At the very least we'll
 need deployment and service manifests.
 
-#### `deploy.yml`
+{% include titlebar.html title="deploy.yml" %}
 
 ```yaml
 apiVersion: apps/v1
@@ -131,7 +144,7 @@ spec:
           imagePullPolicy: IfNotPresent
 ```
 
-#### `service.yml`
+{% include titlebar.html title="service.yml" %}
 
 ```yaml
 # service.yml
@@ -152,7 +165,9 @@ spec:
 Let's apply these manifests to our Kubernetes cluster with the following
 commands:
 
-```bash
+{% include titlebar.html title="zsh" %}
+
+```zsh
 kubectl apply -f deploy.yml
 kubectl apply -f service.yml
 ```
@@ -163,7 +178,9 @@ Now that our app is deployed to our Kubernetes cluster, let's send a request to
 see it working. But first we'll need to get some information to send that
 request.
 
-```bash
+{% include titlebar.html title="zsh" %}
+
+```zsh
 kubectl get pods
 ```
 
@@ -173,7 +190,9 @@ last part of the name is random and unique per pod per deployment of our app.
 Now that we have the the name of our running pod, we'll run the following to
 forward a local port into our cluster directly to our pod.
 
-```bash
+{% include titlebar.html title="zsh" %}
+
+```zsh
 kubectl port-forward rack-app-78bc8fc8cf-9v7g7 9292:9292
 curl https://localhost:9292
 ```
@@ -205,6 +224,8 @@ Kubernetes that our pod is running correctly and responding as we'd expect. If
 the `liveness` probe fails enough over a short period of time, Kubernetes will
 terminate the failing pod and replace it with a new one.
 
+{% include titlebar.html title="yaml" %}
+
 ```yaml
 livenessProde:
   httpGet:
@@ -224,6 +245,8 @@ during normal operation and this connection fails. If that happens, we can no
 longer accept connections from the outside. Our app can use the `readiness`
 probe to signal to Kubernetes that we currently cannot accept connections.
 
+{% include titlebar.html title="yaml" %}
+
 ```yaml
 readinessProbe:
   httpGet:
@@ -233,7 +256,7 @@ readinessProbe:
 
 Let's update our `deploy.yml` to include both of these probes:
 
-#### `deploy.yml`
+{% include titlebar.html title="deploy.yml" %}
 
 ```yaml
 apiVersion: apps/v1
@@ -276,10 +299,10 @@ what we have so far, most of our deploy relies on two key pieces. Our image
 being stored in a docker registry and our `deploy.yml` Kubernetes manifest.
 Let's create a script to build and push our app's container image first.
 
-#### `bin/docker-build-image`
+{% include titlebar.html title="zsh" %}
 
-```sh
-#!/usr/bin/env bash
+```zsh
+#!/usr/bin/env zsh
 
 # bail out of script if any commands error
 set -e 
@@ -308,10 +331,10 @@ and we are using a locally accessible registry for Kubernetes.
 
 Next we'll need a script to deploy our app to Kubernetes.
 
-#### `bin/deploy`
+{% include titlebar.html title="zsh" %}
 
-```sh
-#!/usr/bin/env bash
+```zsh
+#!/usr/bin/env zsh
 
 # bail out of script if any commands error
 set -e
@@ -334,7 +357,7 @@ manifest. We can use this to have a static `deploy.yml` but change which tag of
 our container we deploy. We'll need to modify our `deploy.yml` to account for
 this now.
 
-#### `deploy.yml`
+{% include titlebar.html title="deploy.yml" %}
 
 ```yml
 apiVersion: apps/v1
@@ -374,7 +397,9 @@ instead run the scripts locally after making changes and commiting them to git.
 But if you were running this in a more 'production' environment, these scripts
 could be part of your Continuous Deployment pipeline.
 
-```sh
+{% include titlebar.html title="zsh" %}
+
+```zsh
 bin/docker-build-image
 bin/deploy
 ```
