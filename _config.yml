@@ -60,6 +60,8 @@ exclude:
   - app.ru
   - deploy.yml
   - service.yml
+  - .dockerignore
+  - docker-compose.yml
 
 
 include: 
