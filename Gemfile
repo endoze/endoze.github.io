@@ -8,7 +8,6 @@ group :jekyll_plugins do
   gem "jekyll-gist"
   gem "jekyll-feed", "~> 0.12"
   gem "github-pages"
-  gem "minimal-mistakes-jekyll"
 end
 
 gem "webrick"
