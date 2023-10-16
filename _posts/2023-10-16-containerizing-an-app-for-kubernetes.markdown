@@ -1,7 +1,7 @@
 ---
 title: "Containerizing an App for Kubernetes"
 name: Endoze
-date: 2023-10-11 13:21:03 -0400
+date: 2023-10-16 13:21:03 -0400
 tags: Kubernetes ruby docker
 ---
 
@@ -88,6 +88,9 @@ RUN apk --update add --no-cache --virtual run-dependencies \
 # copy our app.ru file into the filesystem of our image
 COPY app.ru app.ru
 
+# Mark that we will expose a service on this port
+EXPOSE 9292
+
 # run our application via rackup
 CMD rackup app.ru
 ```
@@ -140,9 +143,14 @@ spec:
     spec:
       containers:
         - name: rack-app
-          image: rack-app:latest
+          image: rack-app:latest # image repository and tag
           imagePullPolicy: IfNotPresent
 ```
+
+You'll need to ensure the image repository/tag combination is accessible to your
+Kubernetes cluster. If you uploaded your image to Docker Hub, you'll need to
+change the `deploy.yml` file to reference the repository and tag you used with
+Docker Hub (e.g. `<some-username>/rack-app:<some-tag>`).
 
 {% include titlebar.html title="service.yml" %}
 
@@ -172,6 +180,15 @@ kubectl apply -f deploy.yml
 kubectl apply -f service.yml
 ```
 
+Let's check to see if our app is running in our kubernetes cluster using the
+following command:
+
+{% include titlebar.html title="zsh" %}
+
+```zsh
+kubectl get pods
+```
+
 ## It Lives?
 
 Now that our app is deployed to our Kubernetes cluster, let's send a request to
@@ -185,7 +202,7 @@ kubectl get pods
 ```
 
 We should get a list of all the running pods (containers) in the default
-namespace. Look for one with a name similar to rack-app-78bc8fc8cf-9v7g7. The
+namespace. Look for one with a name similar to `rack-app-78bc8fc8cf-9v7g7`. The
 last part of the name is random and unique per pod per deployment of our app.
 Now that we have the the name of our running pod, we'll run the following to
 forward a local port into our cluster directly to our pod.
@@ -193,7 +210,7 @@ forward a local port into our cluster directly to our pod.
 {% include titlebar.html title="zsh" %}
 
 ```zsh
-kubectl port-forward rack-app-78bc8fc8cf-9v7g7 9292:9292
+kubectl port-forward <replace-me-with-pod-identifier> 9292:9292
 curl https://localhost:9292
 ```
 
@@ -227,7 +244,7 @@ terminate the failing pod and replace it with a new one.
 {% include titlebar.html title="yaml" %}
 
 ```yaml
-livenessProde:
+livenessProbe:
   httpGet:
     path: /
     port: 9292
@@ -282,7 +299,7 @@ spec:
             httpGet:
               path: /
               port: 9292
-          livenessProde:
+          livenessProbe:
             httpGet:
               path: /
               port: 9292
@@ -309,8 +326,8 @@ set -e
 
 # set some variables up for reuse
 COMMITISH="$(git rev-parse HEAD | CUT -c 1-8)"
-PWD="$(pwd)"
-PROJECT_NAME="$(basename $PWD)"
+BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+PROJECT_NAME="rack-app"
 
 docker build -t "$PROJECT_NAME:$BRANCH" .
 
@@ -326,8 +343,9 @@ docker push --all-tags "$PROJECT_NAME"
 
 Our build script makes a few assumptions about our project. It assumes we are
 using git for version control of the project, our default branch is named
-master, the folder containing our project is named after our project and unique,
-and we are using a locally accessible registry for Kubernetes.
+master, and we are using a locally accessible registry for Kubernetes. If you
+are using a registry like Docker Hub, you'll need to change the project name to
+accomodate for this.
 
 Next we'll need a script to deploy our app to Kubernetes.
 
@@ -383,7 +401,7 @@ spec:
             httpGet:
               path: /
               port: 9292
-          livenessProde:
+          livenessProbe:
             httpGet:
               path: /
               port: 9292
@@ -408,5 +426,8 @@ bin/deploy
 
 At this point, we've taken our simple rack based app and enabled deploying it to
 Kubernetes along with creating a few scripts to help automate the entire
-process. Next time we will cover a couple of different applications with
-different requirements for operation in a Kubernetes cluster.
+process. If you'd like to download the entire project, you can grab a copy from
+GitHub
+[here](https://github.com/endoze/example-containerization-for-kubernetes). Next
+time we will cover a couple of different applications with different
+requirements for operation in a Kubernetes cluster.
