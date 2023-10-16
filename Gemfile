@@ -1,7 +1,6 @@
 source "https://rubygems.org"
 
 gem "jekyll"
-gem "minimal-mistakes-jekyll"
 gem "kramdown-parser-gfm"
 
 group :jekyll_plugins do
@@ -9,6 +8,7 @@ group :jekyll_plugins do
   gem "jekyll-gist"
   gem "jekyll-feed", "~> 0.12"
   gem "github-pages"
+  gem "minimal-mistakes-jekyll"
 end
 
 gem "webrick"
