@@ -1,55 +1,69 @@
-# Welcome to Jekyll!
-#
-# This config file is meant for settings that affect your whole blog, values
-# which you are expected to set up once and rarely edit after that. If you find
-# yourself editing this file very often, consider using Jekyll's data files
-# feature for the data you need to update frequently.
-#
-# For technical reasons, this file is *NOT* reloaded automatically when you use
-# 'bundle exec jekyll serve'. If you change this file, please restart the server process.
-#
-# If you need help with YAML syntax, here are some quick references for you:
-# https://learn-the-web.algonquindesign.ca/topics/markdown-yaml-cheat-sheet/#yaml
-# https://learnxinyminutes.com/docs/yaml/
-#
-# Site settings
-# These are used to personalize your new site. If you look in the HTML files,
-# you will see them accessed via {{ site.title }}, {{ site.email }}, and so on.
-# You can create any custom variable you would like, and they will be accessible
-# in the templates via {{ site.myvariable }}.
+title: endoze
+masthead_title: <i class="fa fa-terminal" aria-hidden="true"></i> endoze
+email: endoze@endozemedia.com
+name: &name Endoze
+description: >-
+  Random stuff I've learned and decided to share :)
+baseurl: ""
+url: "https://endoze.github.io"
+github_username: *name
+repository: "endoze/endoze.github.io"
+search: true
+og_image: "https://avatars.githubusercontent.com/u/997161?v=4"
 
-title: Your awesome title
-email: your-email@example.com
-description: >- # this means to ignore newlines until "baseurl:"
-  Write an awesome description for your new site here. You can edit this
-  line in _config.yml. It will appear in your document head meta (for
-  Google search results) and in your feed.xml site description.
-baseurl: "" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site, e.g. http://example.com
-twitter_username: jekyllrb
-github_username:  jekyll
+links: &links
+  - label: "GitHub"
+    icon: "fab fa-fw fa-github"
+    url: "https://github.com/endoze"
 
-# Build settings
-theme: minima
+author:
+  name: *github_username
+  avatar: "https://avatars.githubusercontent.com/u/997161?v=4"
+  bio: "Software Engineer by day. <br />Hacker by night."
+  location: "The Internet"
+  links: *links
+
+social:
+  type: Person
+  name: *name
+  links:
+    - "https://github.com/endoze"
+
+footer:
+  links: *links
+
+theme: "minimal-mistakes-jekyll"
+minimal_mistakes_skin: "dark"
 plugins:
   - jekyll-feed
+  - jekyll-include-cache
+  - jekyll-sitemap
+  - jekyll-gist
 
-# Exclude from processing.
-# The following items will not be processed, by default.
-# Any item listed under the `exclude:` key here will be automatically added to
-# the internal "default list".
-#
-# Excluded items can be processed by explicitly listing the directories or
-# their entries' file path in the `include:` list.
-#
-# exclude:
-#   - .sass-cache/
-#   - .jekyll-cache/
-#   - gemfiles/
-#   - Gemfile
-#   - Gemfile.lock
-#   - node_modules/
-#   - vendor/bundle/
-#   - vendor/cache/
-#   - vendor/gems/
-#   - vendor/ruby/
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: single
+      show_date: true
+      author_profile: true
+      read_time: true
+      comments: true
+      share: true
+      related: true
+
+exclude:
+  - .ruby-version
+  -  .git
+  - Dockerfile
+  - app.ru
+  - deploy.yml
+  - service.yml
+  - .dockerignore
+  - docker-compose.yml
+
+
+include: 
+  - site.webmanifest
+  - browserconfig.xml
