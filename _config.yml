@@ -32,7 +32,6 @@ social:
 footer:
   links: *links
 
-theme: "minimal-mistakes-jekyll"
 minimal_mistakes_skin: "dark"
 plugins:
   - jekyll-feed
